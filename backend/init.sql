@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS history (
+  id SERIAL PRIMARY KEY,
+  expression TEXT NOT NULL,
+  value NUMERIC NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
