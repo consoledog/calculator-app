@@ -12,6 +12,7 @@ const Calculator: React.FC = () => {
   const [display, setDisplay] = useState('0');
   const [expression, setExpression] = useState('');
   const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [showHistory, setShowHistory] = useState(false);
 
   useEffect(() => {
     fetchHistory();
@@ -24,6 +25,26 @@ const Calculator: React.FC = () => {
       setHistory(data);
     } catch (error) {
       console.error('Error fetching history:', error);
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const itemDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+    if (itemDate.getTime() === today.getTime()) {
+      return `Today ${date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`;
+    } else {
+      return date.toLocaleDateString('en-US', {
+        month: 'numeric',
+        day: 'numeric',
+        year: 'numeric'
+      }) + ' ' + date.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit'
+      });
     }
   };
 
@@ -83,44 +104,86 @@ const Calculator: React.FC = () => {
     }
   };
 
-  return (
-    <div className="calculator-container" style={{ display: 'flex', gap: '1rem', padding: '1rem', height: 'calc(100vh - 100px)' }}>
-      <div className="calculator" style={{ background: '#333', borderRadius: '8px', padding: '1rem', width: '280px' }}>
-        <div className="display">{display}</div>
+  if (showHistory) {
+    return (
+      <div className="calculator-container">
+        <div className="history-container">
+          <div className="history-header">
+            <button
+              className="top-bar-icon"
+              onClick={() => setShowHistory(false)}
+            >
+              ����️
+            </button>
+            <button
+              className="top-bar-icon"
+              onClick={() => setShowHistory(false)}
+            >
+              ✕
+            </button>
+          </div>
 
-        <div className="buttons">
-          <button onClick={handleClear} className="button clear">C</button>
-          <button onClick={() => handleOperator('/')} className="button operator">÷</button>
-          <button onClick={() => handleOperator('*')} className="button operator">×</button>
-          <button onClick={() => handleOperator('-')} className="button operator">-</button>
-
-          <button onClick={() => handleNumber('7')} className="button">7</button>
-          <button onClick={() => handleNumber('8')} className="button">8</button>
-          <button onClick={() => handleNumber('9')} className="button">9</button>
-          <button onClick={() => handleOperator('+')} className="button operator">+</button>
-
-          <button onClick={() => handleNumber('4')} className="button">4</button>
-          <button onClick={() => handleNumber('5')} className="button">5</button>
-          <button onClick={() => handleNumber('6')} className="button">6</button>
-          <button onClick={handleEquals} className="button equals">=</button>
-
-          <button onClick={() => handleNumber('1')} className="button">1</button>
-          <button onClick={() => handleNumber('2')} className="button">2</button>
-          <button onClick={() => handleNumber('3')} className="button">3</button>
-
-          <button onClick={() => handleNumber('0')} className="button zero">0</button>
-          <button onClick={() => handleNumber('.')} className="button">.</button>
+          <div className="history-list">
+            {history.map((item) => (
+              <div key={item.id} className="history-item">
+                <div className="history-expression">{item.expression}</div>
+                <div className="history-result">{parseFloat(item.value).toLocaleString()}</div>
+                <div className="history-meta">{formatDate(item.created_at)}</div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
+    );
+  }
 
-      <div className="history" style={{ background: '#f5f5f5', borderRadius: '8px', padding: '1rem', flex: '1', maxHeight: '100%', overflowY: 'auto' }}>
-        <h3 style={{ margin: '0 0 1rem 0', color: '#333', borderBottom: '2px solid #ddd', paddingBottom: '0.5rem' }}>History</h3>
-        <div className="history-list">
-          {history.map((item) => (
-            <div key={item.id} className="history-item" style={{ background: 'white', padding: '0.5rem', marginBottom: '0.5rem', borderRadius: '4px', borderLeft: '3px solid #ff9500' }}>
-              <span style={{ fontFamily: 'Courier New, monospace', color: '#333' }}>{item.expression} = {item.value}</span>
-            </div>
-          ))}
+  return (
+    <div className="calculator-container">
+      <div className="phone-container">
+        <div className="top-bar">
+          <button className="top-bar-icon">↶</button>
+          <button
+            className="top-bar-icon"
+            onClick={() => setShowHistory(true)}
+          >
+            🗑️
+          </button>
+          <button className="top-bar-icon">✕</button>
+        </div>
+
+        <div className="display-section">
+          <div className="expression">
+            {expression || ''}
+          </div>
+          <div className="display">
+            {parseFloat(display).toLocaleString() || display}
+          </div>
+        </div>
+
+        <div className="buttons">
+          <button onClick={handleClear} className="button function">C</button>
+          <button onClick={() => handleOperator('+')} className="button function">+/-</button>
+          <button onClick={() => handleOperator('%')} className="button function">%</button>
+          <button onClick={() => handleOperator('/')} className="button operator">÷</button>
+
+          <button onClick={() => handleNumber('1')} className="button number">1</button>
+          <button onClick={() => handleNumber('2')} className="button number">2</button>
+          <button onClick={() => handleNumber('3')} className="button number">3</button>
+          <button onClick={() => handleOperator('*')} className="button operator">×</button>
+
+          <button onClick={() => handleNumber('4')} className="button number">4</button>
+          <button onClick={() => handleNumber('5')} className="button number">5</button>
+          <button onClick={() => handleNumber('6')} className="button number">6</button>
+          <button onClick={() => handleOperator('+')} className="button operator">+</button>
+
+          <button onClick={() => handleNumber('7')} className="button number">7</button>
+          <button onClick={() => handleNumber('8')} className="button number">8</button>
+          <button onClick={() => handleNumber('9')} className="button number">9</button>
+          <button onClick={() => handleOperator('-')} className="button operator">-</button>
+
+          <button onClick={() => handleNumber('.')} className="button number">.</button>
+          <button onClick={() => handleNumber('0')} className="button number zero">0</button>
+          <button onClick={handleEquals} className="button number">=</button>
         </div>
       </div>
     </div>
